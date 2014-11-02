@@ -6,48 +6,42 @@ public class VersionedFile {
     File file;
     File fileVersion;
 
-    private static final String FILE_VERSION_FORMAT = ".%s.version";
+    private static final String FILE_VERSION_FORMAT = "%s.version";
 
     public VersionedFile(String fileName) {
         file = new File(fileName);
         fileVersion = new File(String.format(FILE_VERSION_FORMAT, fileName));
     }
 
-    public void delete() {
-        int currentVersion = getVersion();
-        while(currentVersion != getVersion()){
-            currentVersion++;
-        }
-
-        if (file.exists()) {
-            file.delete();
-        }
-
-        incrementVersion();
-    }
-
-    public void write(char[] data) {
-        int currentVersion = getVersion();
-        while(currentVersion != getVersion()){
-            currentVersion++;
-        }
-
-        if (file.exists()) {
-            try (
-                    FileWriter fileWriter = new FileWriter(fileVersion)
-            ) {
-                fileWriter.write(data);
-            } catch (FileNotFoundException fileNotFoundException) {
-
-            } catch (IOException ioException) {
-
+    public int delete(int expectedVersion) throws IOException {
+        if(expectedVersion == getVersion()) {
+            if (file.exists()) {
+                file.delete();
+                fileVersion.delete();
             }
         }
 
-        incrementVersion();
+        return 0;
     }
 
-    public char[] read() {
+    public int write(int expectedVersion, char[] data) throws IOException {
+        if(expectedVersion == getVersion()) {
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            try (
+                    FileWriter fileWriter = new FileWriter(file)
+            ) {
+                fileWriter.write(data);
+                incrementVersion();
+                return getVersion();
+            }
+        }
+
+        return 0;
+    }
+
+    public VersionAndData read() throws IOException {
         char[] ret = new char[(int)file.length()];
         if (file.exists()) {
             try (
@@ -60,57 +54,38 @@ public class VersionedFile {
                     ret[i++] = c;
                     c = (char) fileReader.read();
                 }
-            } catch (FileNotFoundException fileNotFoundException) {
-
-            } catch (IOException ioException) {
-
             }
         }
 
-        return ret;
+        return new VersionAndData(getVersion(), ret);
     }
 
-    private int getVersion() {
+    public int getVersion() throws IOException {
         if (fileVersion.exists()) {
             try (
                 FileReader fileReader = new FileReader(fileVersion)
             ) {
                 return fileReader.read();
-            } catch (FileNotFoundException fileNotFoundException) {
-
-            } catch (IOException ioException) {
-
             }
         }
 
         return 0;
     }
 
-    private void setVersion(int newVersion) {
-        if (fileVersion.exists()) {
-            try (
-                    FileWriter fileWriter = new FileWriter(fileVersion)
-            ) {
-                fileWriter.write(newVersion);
-            } catch (FileNotFoundException fileNotFoundException) {
-
-            } catch (IOException ioException) {
-
-            }
+    private void setVersion(int newVersion) throws IOException {
+        if (!fileVersion.exists()) {
+            fileVersion.createNewFile();
+        }
+        try (
+                FileWriter fileWriter = new FileWriter(fileVersion)
+        ) {
+            fileWriter.write(newVersion);
         }
     }
 
-    private void incrementVersion() {
+    private void incrementVersion() throws IOException {
         int currentVersion = getVersion();
         currentVersion++;
         setVersion(currentVersion);
-    }
-
-    private boolean CompareAndSwap(int expectedVersion, int newVersion) {
-        if(getVersion() == expectedVersion) {
-            setVersion(newVersion);
-        }
-
-        return true;
     }
 }
