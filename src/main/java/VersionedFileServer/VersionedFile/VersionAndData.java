@@ -2,9 +2,9 @@ package VersionedFileServer.VersionedFile;
 
 public class VersionAndData {
     int version;
-    char[] data;
+    byte[] data;
 
-    public VersionAndData(int version, char[] data) {
+    public VersionAndData(int version, byte[] data) {
         this.version = version;
         this.data = data;
     }
@@ -13,7 +13,7 @@ public class VersionAndData {
         return this.version;
     }
 
-    public char[] getData() {
+    public byte[] getData() {
         return this.data;
     }
 }

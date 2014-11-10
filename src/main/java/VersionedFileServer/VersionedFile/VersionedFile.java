@@ -17,6 +17,8 @@ public class VersionedFile {
         if(expectedVersion == getVersion()) {
             if (file.exists()) {
                 file.delete();
+            }
+            if (fileVersion.exists()) {
                 fileVersion.delete();
             }
         }
@@ -42,30 +44,27 @@ public class VersionedFile {
     }
 
     public VersionAndData read() throws IOException {
-        char[] ret = new char[(int)file.length()];
         if (file.exists()) {
             try (
-                    FileReader fileReader = new FileReader(file)
+                    FileInputStream fileInputStream = new FileInputStream(file);
             ) {
-                int i = 0;
-                char c = (char) fileReader.read();
-                while (c != -1 && i < file.length())
-                {
-                    ret[i++] = c;
-                    c = (char) fileReader.read();
-                }
+                int fileLength = (int) file.length();
+                byte[] ret = new byte[fileLength];
+                fileInputStream.read(ret);
+                return new VersionAndData(getVersion(), ret);
             }
         }
 
-        return new VersionAndData(getVersion(), ret);
+        return new VersionAndData(getVersion(), new byte[0]);
     }
 
     public int getVersion() throws IOException {
         if (fileVersion.exists()) {
             try (
-                FileReader fileReader = new FileReader(fileVersion)
+                FileReader fileReader = new FileReader(fileVersion);
+                BufferedReader bufferedReader = new BufferedReader(fileReader);
             ) {
-                return fileReader.read();
+                return Integer.parseInt(bufferedReader.readLine());
             }
         }
 
@@ -77,9 +76,10 @@ public class VersionedFile {
             fileVersion.createNewFile();
         }
         try (
-                FileWriter fileWriter = new FileWriter(fileVersion)
+                FileWriter fileWriter = new FileWriter(fileVersion);
+                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
         ) {
-            fileWriter.write(newVersion);
+            bufferedWriter.write(String.valueOf(newVersion));
         }
     }
 

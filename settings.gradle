@@ -1,0 +1,4 @@
+rootProject.name = 'VersionedFileServer'
+
+include 'test'
+
