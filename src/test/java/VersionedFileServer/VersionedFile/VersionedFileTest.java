@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class VersionedFileTest {
     private static final String FILE_NAME = "C:\\Users\\zachvan\\Documents\\test.txt";
-    private static final char[] FILE_CONTENTS = "testwrite".toCharArray();
+    private static final byte[] FILE_CONTENTS = "testwrite".getBytes();
     private static final String VERSION_SUFFIX = ".version";
 
     @Test
@@ -35,7 +35,7 @@ public class VersionedFileTest {
 
     private void TestWrite(int expected) throws IOException {
         VersionedFile versionedFile = new VersionedFile(FILE_NAME);
-        int result = versionedFile.write(expected, FILE_CONTENTS);
+        int result = versionedFile.write(expected, new String(FILE_CONTENTS).toCharArray());
         Assert.assertEquals(result, expected + 1);
     }
 

@@ -24,7 +24,7 @@ public class DeleteRequest implements HttpRequest {
 
         try {
             int returnedVersion = versionedFile.delete(expectedVersion);
-            if (returnedVersion == expectedVersion + 1) {
+            if (returnedVersion == 0) {
                 return new ValidHttpResponse(null);
             } else {
                 return new ConflictResponse();

@@ -1,5 +1,6 @@
-package HttpServer;
+package VersionedFileServer;
 
+import HttpServer.HttpRequestHandler;
 import HttpServer.Request.HttpRequest;
 import HttpServer.Request.InvalidHttpRequest;
 import VersionedFileServer.Request.DeleteRequest;
@@ -45,7 +46,7 @@ public class VersionedFileHandler extends HttpRequestHandler {
     protected static int getVersion(BufferedReader bufferedReader) throws IOException {
         for (String readString = bufferedReader.readLine(); readString.length() > 0; readString = bufferedReader.readLine()) {
             if (readString.startsWith("Version:")) {
-                return Integer.parseInt(readString.substring(8));
+                return Integer.parseInt(readString.substring(8).trim());
             }
         }
 

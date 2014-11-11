@@ -24,7 +24,7 @@ public class VersionAndDataResponse implements HttpResponse {
             writer.write("Server: Java HTTP Server 1.0" + System.lineSeparator());
             writer.write("Content-type: text/html" + System.lineSeparator());
             writer.write("Content-length: " + data.length + System.lineSeparator());
-            writer.write("Version: " + version);
+            writer.write("Version: " + version + System.lineSeparator());
             writer.write("Connection: close" + System.lineSeparator());
             writer.write(System.lineSeparator());
             writer.write(new String(data));
