@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 
-public class VersionoFileTestHelper {
+public class VersionedFileTestHelper {
     public static void MakeSureFileExists(String fileName, String fileContent) throws IOException {
         File file = new File(fileName);
 

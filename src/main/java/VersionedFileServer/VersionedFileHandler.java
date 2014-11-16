@@ -3,53 +3,49 @@ package VersionedFileServer;
 import HttpServer.HttpRequestHandler;
 import HttpServer.Request.HttpRequest;
 import HttpServer.Request.InvalidHttpRequest;
-import VersionedFileServer.Request.DeleteRequest;
 import VersionedFileServer.Request.GetRequest;
+import VersionedFileServer.Request.DeleteRequest;
 import VersionedFileServer.Request.PutRequest;
 
 import java.io.*;
 
 public class VersionedFileHandler extends HttpRequestHandler {
-    private static final String WEB_ROOT = "C:\\Users\\zachvan\\Documents\\";
+    protected int version;
 
-    public static HttpRequest parseRequest(BufferedReader bufferedReader) {
+    @Override
+    protected HttpRequest parseRequest(BufferedReader bufferedReader, String baseDir) {
         try {
-            String readString = bufferedReader.readLine();
-            if (readString == null) return new InvalidHttpRequest();
-            String[] splitLine = readString.split(" ");
-
-            if (splitLine.length < 3) return new InvalidHttpRequest();
-
-            String fileName = splitLine[1];
-            fileName = fileName.substring(1);
-            if (fileName.equals("")) return new InvalidHttpRequest();
-
-            String action = splitLine[0];
-
-            int version = getVersion(bufferedReader);
-
-            switch (action) {
-                case "GET":
-                    return new GetRequest(WEB_ROOT + fileName);
-                case "DELETE":
-                    return new DeleteRequest(WEB_ROOT + fileName, version);
-                case "PUT":
-                    return new PutRequest(WEB_ROOT + fileName, parsePutBodyData(bufferedReader).toCharArray(), version);
-            }
+            parseCommand(bufferedReader);
+            version = getVersion(bufferedReader);
+            return processRequest(bufferedReader, baseDir);
         } catch (IOException exception) {
             return new InvalidHttpRequest();
+        }
+    }
+
+    @Override
+    protected HttpRequest processRequest(BufferedReader bufferedReader, String baseDir) throws IOException {
+        switch (action) {
+            case "GET":
+                return new GetRequest(baseDir + fileName);
+            case "DELETE":
+                return new DeleteRequest(baseDir + fileName, version);
+            case "PUT":
+                return new PutRequest(baseDir + fileName, parsePutBodyData(bufferedReader).toCharArray(), version);
         }
 
         return new InvalidHttpRequest();
     }
 
     protected static int getVersion(BufferedReader bufferedReader) throws IOException {
+        int version = 0;
+
         for (String readString = bufferedReader.readLine(); readString.length() > 0; readString = bufferedReader.readLine()) {
             if (readString.startsWith("Version:")) {
-                return Integer.parseInt(readString.substring(8).trim());
+                version = Integer.parseInt(readString.substring(8).trim());
             }
         }
 
-        return 0;
+        return version;
     }
 }

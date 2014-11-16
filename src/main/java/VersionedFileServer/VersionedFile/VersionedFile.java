@@ -21,9 +21,11 @@ public class VersionedFile {
             if (fileVersion.exists()) {
                 fileVersion.delete();
             }
+
+            return 0;
         }
 
-        return 0;
+        return -1;
     }
 
     public int write(int expectedVersion, char[] data) throws IOException {
@@ -40,7 +42,7 @@ public class VersionedFile {
             }
         }
 
-        return 0;
+        return -1;
     }
 
     public VersionAndData read() throws IOException {

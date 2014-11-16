@@ -4,10 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class VersionedFileTest {
     private static final String FILE_NAME = "C:\\Users\\zachvan\\Documents\\test.txt";
@@ -15,34 +11,107 @@ public class VersionedFileTest {
     private static final String VERSION_SUFFIX = ".version";
 
     @Test
-    public void Runner() throws IOException {
-        VersionoFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionoFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+    public void TestManyVersions() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
 
-        for (int i = 0; i < 20; i++) {
-            TestWrite(i);
-            TestRead(i+1);
+        for (int i = 0; i < 2000; i++) {
+            Write(i, i+1);
+            Read(i + 1, FILE_CONTENTS);
         }
 
-        TestDelete(20);
+        Delete(2000, 0);
     }
 
-    private void TestDelete(int expected) throws IOException {
+    @Test
+    public void TestWriteWrongVersion() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        Write(1,2);
+        Write(0,-1);
+    }
+
+    @Test
+    public void TestWriteVersionFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+    }
+
+    @Test
+    public void TestWriteFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        Write(1,2);
+    }
+
+    @Test
+    public void TestReadVersionFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Read(0, FILE_CONTENTS);
+    }
+
+    @Test
+    public void TestReadFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        Read(1, new byte[0]);
+    }
+
+    @Test
+    public void TestDeleteWrongVersion() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        Write(1,2);
+        Delete(0,-1);
+    }
+
+    @Test
+    public void TestDeleteVersionFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Delete(0,0);
+    }
+
+    @Test
+    public void TestDeleteFileDoesNotExist() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        Write(0,1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        Delete(1,0);
+    }
+
+
+    private void Delete(int expected, int expectedResult) throws IOException {
         VersionedFile versionedFile = new VersionedFile(FILE_NAME);
         int result = versionedFile.delete(expected);
-        Assert.assertEquals(result, 0);
+        Assert.assertEquals(result, expectedResult);
     }
 
-    private void TestWrite(int expected) throws IOException {
+    private void Write(int expected, int expectedResult) throws IOException {
         VersionedFile versionedFile = new VersionedFile(FILE_NAME);
         int result = versionedFile.write(expected, new String(FILE_CONTENTS).toCharArray());
-        Assert.assertEquals(result, expected + 1);
+        Assert.assertEquals(result, expectedResult);
     }
 
-    private void TestRead(int expected) throws IOException {
+    private void Read(int expectedResult, byte[] expectedContents) throws IOException {
         VersionedFile versionedFile = new VersionedFile(FILE_NAME);
         VersionAndData result = versionedFile.read();
-        Assert.assertEquals(result.getVersion(),expected);
-        Assert.assertArrayEquals(result.getData(), FILE_CONTENTS);
+        Assert.assertEquals(result.getVersion(),expectedResult);
+        Assert.assertArrayEquals(result.getData(), expectedContents);
     }
 }

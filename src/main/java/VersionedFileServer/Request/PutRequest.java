@@ -33,7 +33,6 @@ public class PutRequest implements HttpRequest {
             } else {
                 return new ConflictResponse();
             }
-
         }
         catch (IOException exception) {
             return new InvalidHttpResponse();
