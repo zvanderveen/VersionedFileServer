@@ -16,10 +16,11 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.UriBuilder;
 
 public class VersionedFileServerTest {
+    private static final String FILE_PATH = "C:\\Users\\zachvan\\Documents\\";
     private static final String FILE_NAME = "test.txt";
-    private static final byte[] FILE_CONTENTS = "testwrite".getBytes();
+    private static final String FILE_CONTENTS = "testwrite\n\n";
     private static final String VERSION_SUFFIX = ".version";
-    private static int PORT = 9000;
+    private static int PORT = 8080;
 
     @Before
     public void setup() {
@@ -32,8 +33,8 @@ public class VersionedFileServerTest {
 
     @Test
     public void TestManyVersions() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
 
         for (int i = 0; i < 2000; i++) {
             Write(200, i, i+1);
@@ -45,99 +46,104 @@ public class VersionedFileServerTest {
 
     @Test
     public void TestWriteWrongVersion() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
         Write(200, 1, 2);
-        Write(200, 0, -1);
+        Write(409, 0, -1);
     }
 
     @Test
     public void TestWriteVersionFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
     }
 
     @Test
-    public void TestWriteFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+    public void TestWriteFileDoesNotExistFailure() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        Write(409, 0, 1);
+    }
+
+    @Test
+    public void TestWriteFileDoesNotExistSuccess() throws IOException {
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
+        Write(200, 0, 1);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
         Write(200, 1, 2);
     }
 
     @Test
     public void TestReadVersionFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Read(200, 0, FILE_CONTENTS);
     }
 
     @Test
     public void TestReadFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0,1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        Read(200, 1, new byte[0]);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        Read(200, 1, "");
     }
 
     @Test
     public void TestDeleteWrongVersion() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
         Write(200, 1, 2);
-        Delete(200, 0, -1);
+        Delete(409, 0, -1);
     }
 
     @Test
     public void TestDeleteVersionFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Delete(200, 0, 0);
     }
 
     @Test
     public void TestDeleteFileDoesNotExist() throws IOException {
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME + VERSION_SUFFIX);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME + VERSION_SUFFIX);
         Write(200, 0, 1);
-        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_NAME);
+        VersionedFileTestHelper.MakeSureFileDoesNotExist(FILE_PATH + FILE_NAME);
         Delete(200, 1, 0);
     }
-
 
     private void Delete(int expectedHttpResponse,int expected, int expectedResult) throws IOException {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
 
         WebResource webResourceA = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
-        ClientResponse response = webResourceA.header("Version", expected).accept("text/plain").delete(ClientResponse.class, FILE_CONTENTS);
+        ClientResponse response = webResourceA.header("Version", expected).accept("text/plain").delete(ClientResponse.class);
         Assert.assertEquals(response.getStatus(), expectedHttpResponse);
-
-        MultivaluedMap<String, String> headers = response.getHeaders();
-        Assert.assertTrue(headers.get("Version").equals(expectedResult));
     }
 
     private void Write(int expectedHttpResponse,int expected, int expectedResult) throws IOException {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
 
-        WebResource webResourceA = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
-        ClientResponse response = webResourceA.accept("text/plain").put(ClientResponse.class, FILE_CONTENTS);
-        Assert.assertEquals(response.getStatus(), expectedHttpResponse);
+        WebResource webResource = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
+        ClientResponse response = webResource.header("Version", expected).type("text/plain").put(ClientResponse.class, FILE_CONTENTS);
+        Assert.assertEquals(expectedHttpResponse, response.getStatus());
     }
 
-    private void Read(int expectedHttpResponse, int expectedResult, byte[] expectedContents) throws IOException {
+    private void Read(int expectedHttpResponse, int expectedResult, String expectedContents) throws IOException {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
         WebResource webResourceA = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
@@ -146,9 +152,10 @@ public class VersionedFileServerTest {
         Assert.assertEquals(response.getStatus(), expectedHttpResponse);
 
         MultivaluedMap<String, String> headers = response.getHeaders();
-        Assert.assertTrue(headers.get("Version").equals(expectedResult));
+        String version = headers.getFirst("Version");
+        Assert.assertTrue(version.equals(String.valueOf(expectedResult)));
 
         String output = response.getEntity(String.class);
-        Assert.assertEquals(output, expectedContents);
+        Assert.assertEquals(output, expectedContents.trim());
     }
 }
