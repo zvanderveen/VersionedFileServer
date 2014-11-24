@@ -12,9 +12,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class PutRequest implements HttpRequest {
-    String fileName;
-    char[] data;
-    int expectedVersion;
+    protected String fileName;
+    protected char[] data;
+    protected int expectedVersion;
 
     public PutRequest(String fileName, char[] data, int expectedVersion) {
         this.fileName = fileName;

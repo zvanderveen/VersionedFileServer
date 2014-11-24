@@ -9,11 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DistributedVersionedFileServer extends VersionedFileServer {
-    List<URI> slaves;
-
-    public DistributedVersionedFileServer(int port, String baseDir, VersionedFileHandler versionedFileHandler, List<URI> slaves) {
-        super(port, baseDir, versionedFileHandler);
-        this.slaves = slaves;
+    public DistributedVersionedFileServer(int port, String baseDir, List<URI> slaves) {
+        super(port, baseDir, new DistributedVersionedFileHandler(slaves));
     }
 
     public static void main(String[] args) {
@@ -35,6 +32,6 @@ public class DistributedVersionedFileServer extends VersionedFileServer {
             }
         }
 
-        DistributedVersionedFileServer myServer = new DistributedVersionedFileServer(port, baseDir, new VersionedFileHandler(), slaves);
+        DistributedVersionedFileServer myServer = new DistributedVersionedFileServer(port, baseDir, slaves);
     }
 }

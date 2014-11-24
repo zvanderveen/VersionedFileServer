@@ -129,8 +129,8 @@ public class VersionedFileServerTest {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
 
-        WebResource webResourceA = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
-        ClientResponse response = webResourceA.header("Version", expected).accept("text/plain").delete(ClientResponse.class);
+        WebResource webResource = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
+        ClientResponse response = webResource.header("Version", expected).accept("text/plain").delete(ClientResponse.class);
         Assert.assertEquals(response.getStatus(), expectedHttpResponse);
     }
 
@@ -146,9 +146,9 @@ public class VersionedFileServerTest {
     private void Read(int expectedHttpResponse, int expectedResult, String expectedContents) throws IOException {
         ClientConfig config = new DefaultClientConfig();
         Client client = Client.create(config);
-        WebResource webResourceA = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
+        WebResource webResource = client.resource(UriBuilder.fromUri("http://localhost:" + PORT + "/" + FILE_NAME).build());
 
-        ClientResponse response = webResourceA.accept("text/plain").get(ClientResponse.class);
+        ClientResponse response = webResource.accept("text/plain").get(ClientResponse.class);
         Assert.assertEquals(response.getStatus(), expectedHttpResponse);
 
         MultivaluedMap<String, String> headers = response.getHeaders();
