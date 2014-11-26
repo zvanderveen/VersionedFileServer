@@ -1,12 +1,20 @@
 package DistributedVersionedFileServer.Request;
 
 import HttpServer.Request.HttpRequest;
-import VersionedFileServer.Request.GetRequest;
+import HttpServer.Request.GetRequest;
 
 import java.net.URI;
 import java.util.List;
 
 public class DistributedGetRequest extends GetRequest {
-    public DistributedGetRequest(String s, List<URI> slaves) {
+    private static final String FILE_VERSION_FORMAT = "%s.version";
+
+    List<URI> slaves;
+
+    public DistributedGetRequest(String fileName, List<URI> slaves) {
+        super(fileName);
+        this.slaves = slaves;
     }
+
+
 }

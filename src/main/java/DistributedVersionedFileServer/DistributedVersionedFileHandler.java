@@ -7,13 +7,14 @@ import DistributedVersionedFileServer.Request.DistributedDeleteRequest;
 import DistributedVersionedFileServer.Request.DistributedGetRequest;
 import DistributedVersionedFileServer.Request.DistributedPutRequest;
 import VersionedFileServer.VersionedFileHandler;
+import HttpServer.HttpRequestHandler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
-public class DistributedVersionedFileHandler extends VersionedFileHandler {
+public class DistributedVersionedFileHandler extends HttpRequestHandler {
     List<URI> slaves;
 
     public DistributedVersionedFileHandler(List<URI> slaves) {
@@ -26,9 +27,9 @@ public class DistributedVersionedFileHandler extends VersionedFileHandler {
             case "GET":
                 return new DistributedGetRequest(baseDir + fileName, slaves);
             case "DELETE":
-                return new DistributedDeleteRequest(baseDir + fileName, version, slaves);
+                return new DistributedDeleteRequest(baseDir + fileName, slaves);
             case "PUT":
-                return new DistributedPutRequest(baseDir + fileName, parsePutBodyData(bufferedReader).toCharArray(), version, slaves);
+                return new DistributedPutRequest(baseDir + fileName, parsePutBodyData(bufferedReader).toCharArray(), null, slaves);
         }
 
         return new InvalidHttpRequest();

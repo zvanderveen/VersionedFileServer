@@ -1,14 +1,12 @@
 package DistributedVersionedFileServer;
 
-import VersionedFileServer.VersionedFileHandler;
-import VersionedFileServer.VersionedFileServer;
-
+import HttpServer.HttpServer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DistributedVersionedFileServer extends VersionedFileServer {
+public class DistributedVersionedFileServer extends HttpServer {
     public DistributedVersionedFileServer(int port, String baseDir, List<URI> slaves) {
         super(port, baseDir, new DistributedVersionedFileHandler(slaves));
     }
