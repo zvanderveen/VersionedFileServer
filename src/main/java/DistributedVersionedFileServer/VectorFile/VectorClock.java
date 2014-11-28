@@ -4,75 +4,64 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.*;
-import java.util.Collections;
-import java.util.Map;
+import java.util.*;
+
 import com.google.common.base.Throwables;
 
 public class VectorClock {
-    Map<String, Integer> vectorMap;
+    Map<String, Integer> vectorClockMap;
 
-    public VectorClock(String string) {
-        vectorMap = parseString(string);
+    public VectorClock() {
+        vectorClockMap = new HashMap<String, Integer>();
     }
 
-    public VectorClock(File file) {
-        try (
-            FileReader fileReader = new FileReader(file);
-            BufferedReader bufferedReader = new BufferedReader(fileReader);
-        ) {
-            String fileContents = bufferedReader.readLine();
-            vectorMap = parseString(fileContents);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Throwables.propagate(e);
-        }
+    public VectorClock(String parseString) {
+        vectorClockMap = parseString(parseString);
     }
 
     public VectorClock(Map<String, Integer> vectorMap) {
-        this.vectorMap = vectorMap;
+        this.vectorClockMap = vectorMap;
     }
 
-    public boolean conflict(VectorClock newVector) {
-        return newVector.getVersion() <= getVersion();
+    public boolean conflict(VectorClock newVectorClock) {
+        return newVectorClock.getVersion() <= getVersion();
     }
 
     public void increment(String string) {
-        vectorMap.put(string, getVersion() + 1);
+        vectorClockMap.put(string, getVersion() + 1);
     }
 
     public int getVersion() {
-        int maxVersion = 0;
-
-        for (Integer version : vectorMap.values()) {
-            maxVersion = Math.max(maxVersion, version);
+        if (vectorClockMap.size() == 0) {
+            return 0;
         }
 
-        return maxVersion;
+        return Collections.max(vectorClockMap.values());
+    }
+
+    public Set<String> getMaxKeys() {
+        int version = getVersion();
+        Set<String> ret = new HashSet<String>();
+
+        for (Map.Entry<String, Integer> entry : vectorClockMap.entrySet()) {
+            if (entry.getValue() == version) {
+                ret.add(entry.getKey());
+            }
+        }
+
+        return ret;
     }
 
     @Override
     public String toString() {
         try {
-            return new ObjectMapper().writeValueAsString(vectorMap);
+            return new ObjectMapper().writeValueAsString(vectorClockMap);
         } catch (IOException e) {
             e.printStackTrace();
             Throwables.propagate(e);
         }
 
         return "";
-    }
-
-    public void writeToFile(File file) {
-        try (
-                FileWriter fileWriter = new FileWriter(file);
-                BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-        ) {
-            String fileContents = toString();
-            bufferedWriter.write(fileContents);
-        } catch (IOException e) {
-            e.printStackTrace();
-            Throwables.propagate(e);
-        }
     }
 
     private Map<String, Integer> parseString(String string) {

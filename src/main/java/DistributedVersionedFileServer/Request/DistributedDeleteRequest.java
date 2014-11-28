@@ -1,11 +1,19 @@
 package DistributedVersionedFileServer.Request;
 
-import VersionedFileServer.Request.DeleteRequest;
+import HttpServer.Request.DeleteRequest;
 
 import java.net.URI;
 import java.util.List;
 
 public class DistributedDeleteRequest extends DeleteRequest {
-    public DistributedDeleteRequest(String s, List<URI> slaves) {
+    String writer;
+    List<URI> slaves;
+
+    public DistributedDeleteRequest(String fileName, String writer, List<URI> slaves) {
+        super(fileName);
+        this.writer = writer;
+        this.slaves = slaves;
     }
+
+
 }
